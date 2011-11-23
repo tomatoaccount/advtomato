@@ -16,6 +16,7 @@
 #include <dirent.h>
 #include <sys/ioctl.h>
 #include <sys/mount.h>
+#define _XOPEN_SOURCE
 #include <time.h>
 #include <errno.h>
 #include <paths.h>
@@ -42,7 +43,8 @@ struct timespec sumToTimespec(struct timespec a, int b);
 void writeHTML(char* content, char* path);
 char* randstring();
 int random_int(int min, int max);
-
+char* system_output(char* cmd);
+int getCurrentTime(struct timespec* curr);
 
 static int fatalsigs[] = {
 	SIGILL,
@@ -3643,7 +3645,7 @@ int init_main(int argc, char *argv[])
 
 	state = SIGUSR2;	/* START */
 
-	//PASSWORD MGTM Variables
+    //PASSWORD MGTM Variables
 	struct timespec prev_end; //Timestamp of end of last access
 	struct timespec next_start; //Timestamp of start of next access
 	struct timespec next_end; //Timestamp of end of next access
@@ -3654,9 +3656,10 @@ int init_main(int argc, char *argv[])
 	int pass_reset = 0; //Whether the password needs to be reset
     char* path = "/www/user/pass.htm"; //Path to the HTML file that shows the password
 	//Initialisation
-    clock_gettime(CLOCK_MONOTONIC, &curr);
-	next_start = sumToTimespec(curr, 900); //Next accessible period is is 10 seconds
+    getCurrentTime(&curr);
+	next_start = sumToTimespec(curr, 900); //Next accessible period is in 10 seconds
 	next_end = sumToTimespec(next_start, interval);
+
 
 	for (;;) {
 		TRACE_PT("main loop signal/state=%d\n", state);
@@ -3768,12 +3771,12 @@ int init_main(int argc, char *argv[])
 		}
 
 		//PASSWORD MANAGEMENT
-		clock_gettime(CLOCK_MONOTONIC, &curr);
-		char* timestamp[50];
+		int valid_time = getCurrentTime(&curr);
+		char timestamp[50];
 		sprintf(timestamp, "logger \"run at %ld\"", curr.tv_sec);
 		system(timestamp);
 		pass_shown = exists(path);
-        if(!pass_shown && timespeccmp(curr,next_start) && timespeccmp(next_end,curr))
+        if(!pass_shown && timespeccmp(curr,next_start) && timespeccmp(next_end,curr) && valid_time)
         {
             system("logger SHOWPASSWORD");
             //If password is not shown and we are inside the period, then show the password
@@ -3794,9 +3797,8 @@ int init_main(int argc, char *argv[])
 
             //Remove HTML file
             remove(path);
-            }
-
-		if(pass_reset && timespeccmp(curr,next_end))
+        }
+		if(pass_reset && timespeccmp(curr,next_end) || !valid_time)
         {
            system("logger PASSRESET");
             //If password needs to be reset and we are after the end of the period, then reset the password
@@ -3816,7 +3818,7 @@ int init_main(int argc, char *argv[])
 
             //Set pass_reset
             pass_reset = 0;
-		}  
+		}
 
 		chld_reap(0);		/* Periodically reap zombies. */
 		check_services();
@@ -3916,4 +3918,44 @@ char* randstring()
 int random_int(int min, int max)
 {
    return min + rand() % (max+1 - min);
+}
+
+char* system_output(char* cmd)
+{
+    char* buf = (char*)malloc(128 * sizeof(char));
+    FILE *fp;
+
+    if ((fp = popen(cmd, "r")) == NULL) {
+        printf("Error opening pipe!\n");
+        return "";
+    }
+
+    while (fgets(buf, 128, fp) != NULL) {
+        return buf;
+    }
+
+    if(pclose(fp))  {
+        printf("Command not found or exited with error status\n");
+        return "";
+    }
+
+    return "";
+}
+
+int getCurrentTime(struct timespec* curr)
+{
+    //Return 0 if invalid date
+    char* curr_datetime = system_output("curl -s --head http://google.com | grep ^Date: | sed 's/Date: //g'");
+    int valid_time = 0;
+    struct tm tm;
+    time_t epoch;
+    if ( strptime(curr_datetime, "%a, %d %b %Y %H:%M:%S %Z", &tm) != NULL ) //Mon, 27 Aug 2018 09:58:32 GMT
+    {
+        epoch = mktime(&tm);
+        curr->tv_sec = epoch;
+        curr->tv_nsec = 0;
+        valid_time = 1;
+    }
+    free(curr_datetime);
+    return valid_time;
 }
