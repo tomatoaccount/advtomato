@@ -3650,7 +3650,7 @@ int init_main(int argc, char *argv[])
 	int pass_reset = 0; //Whether the password needs to be reset
 	//Initialisation
 	next_start.tv_sec = 1535054400;
-	next_end.tv_sec = sumToTimespec(next_start, interval);
+	next_end = sumToTimespec(next_start, interval);
 
 	for (;;) {
 		TRACE_PT("main loop signal/state=%d\n", state);
