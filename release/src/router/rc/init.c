@@ -30,8 +30,15 @@
 #include <wlutils.h>
 #include <bcmdevs.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #define SHELL "/bin/sh"
+
+int timespeccmp(struct timespec a, struct timespec b);
+int isPasswordShown();
+struct timespec sumToTimespec(struct timespec a, int b);
 
 static int fatalsigs[] = {
 	SIGILL,
@@ -3632,6 +3639,19 @@ int init_main(int argc, char *argv[])
 
 	state = SIGUSR2;	/* START */
 
+	//PASSWORD MGTM Variables
+	struct timespec prev_end; //Timestamp of end of last access
+	struct timespec next_start; //Timestamp of start of next access
+	struct timespec next_end; //Timestamp of end of next access
+	struct timespec curr; //Current timestamp
+	int interval = 600; //Number of seconds in which system is accessible. It is end - start,
+	int week_interval = 6000; //Number of seconds between accessible periods. For example, 1 week
+	int pass_shown = 0; //Wheter the HTML with the password is accesible or not
+	int pass_reset = 0; //Whether the password needs to be reset
+	//Initialisation
+	next_start.tv_sec = 1535054400;
+	next_end.tv_sec = sumToTimespec(next_start, interval);
+
 	for (;;) {
 		TRACE_PT("main loop signal/state=%d\n", state);
 
@@ -3742,7 +3762,49 @@ int init_main(int argc, char *argv[])
 		}
 
 		//PASSWORD MANAGEMENT
-		system("/jffs/passwordscript.sh");
+		clock_gettime(CLOCK_MONOTONIC, &curr);
+		pass_shown = isPasswordShown();
+		if(!pass_shown && timespeccmp(curr,next_start) && timespeccmp(next_end,curr))
+		{
+			system("logger SHOWPASSWORD");
+			//If password is not shown and we are inside the period, then show the password
+
+			//Retrieve password
+			
+			//Write HTML file
+
+			//Set pass_shown
+			pass_shown = 1;
+
+			//Set pass_reset
+			pass_reset = 1;
+		}
+		else if(pass_shown && timespeccmp(curr,next_end))
+		{
+			//If password is shown and we are after the end of the period, then hide password
+
+			//Remove HTML file
+
+			//Set pass_shown
+			pass_shown = 0;
+		}
+		if(pass_reset && timespeccmp(curr,next_end))
+		{
+			system("logger PASSRESET");
+			//If password needs to be reset and we are after the end of the period, then reset the password
+
+			//Generate random password
+
+			//Set the password
+
+			//Set the new timespec
+			prev_end = next_end;
+			next_start = sumToTimespec(prev_end, week_interval);
+			next_end = sumToTimespec(next_start, interval);
+
+			//Set pass_reset
+			pass_reset = 0;
+		}
 
 		chld_reap(0);		/* Periodically reap zombies. */
 		check_services();
@@ -3780,3 +3842,26 @@ int reboothalt_main(int argc, char *argv[])
 	return 0;
 }
 
+int timespeccmp(struct timespec a, struct timespec b)
+{
+	//Returns true if b happened first - b will be lower
+	if(a.tv_sec == b.tv_sec)
+		return a.tv_nsec > b.tv_nsec;
+	else
+		return a.tv_sec > b.tv_sec;
+}
+
+int isPasswordShown()
+{
+	//Returns true if there is the HTML file with the password
+	char* filename = "/jffs/pass.htm";
+	struct stat buffer;   
+  	return (stat(filename, &buffer) == 0);
+}
+
+struct timespec sumToTimespec(struct timespec a, int b)
+{
+	struct timespec c = a;
+	c.tv_sec += b;
+	return c;
+}
