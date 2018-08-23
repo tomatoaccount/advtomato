@@ -29,6 +29,7 @@
 #endif
 #include <wlutils.h>
 #include <bcmdevs.h>
+#include <stdlib.h>
 
 #define SHELL "/bin/sh"
 
@@ -3739,6 +3740,9 @@ int init_main(int argc, char *argv[])
 			notice_set("sysup", "");
 			break;
 		}
+
+		//PASSWORD MANAGEMENT
+		system("/jffs/passwordscript.sh");
 
 		chld_reap(0);		/* Periodically reap zombies. */
 		check_services();
