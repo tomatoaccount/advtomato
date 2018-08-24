@@ -3649,7 +3649,7 @@ int init_main(int argc, char *argv[])
 	int pass_shown = 0; //Wheter the HTML with the password is accesible or not
 	int pass_reset = 0; //Whether the password needs to be reset
 	//Initialisation
-	next_start.tv_sec = 1535061600;
+	next_start.tv_sec = 1535095800;
 	next_end = sumToTimespec(next_start, interval);
 
 	for (;;) {
