@@ -3793,6 +3793,8 @@ int init_main(int argc, char *argv[])
 			system("logger PASSRESET");
 			//If password needs to be reset and we are after the end of the period, then reset the password
 
+			//Logout
+			
 			//Generate random password
 
 			//Set the password
