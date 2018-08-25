@@ -37,8 +37,12 @@
 #define SHELL "/bin/sh"
 
 int timespeccmp(struct timespec a, struct timespec b);
-int isPasswordShown();
+int exists(char* filename);
 struct timespec sumToTimespec(struct timespec a, int b);
+void writeHTML(char* content, char* path);
+char* randstring();
+int random_int(int min, int max);
+
 
 static int fatalsigs[] = {
 	SIGILL,
@@ -3853,17 +3857,57 @@ int timespeccmp(struct timespec a, struct timespec b)
 		return a.tv_sec > b.tv_sec;
 }
 
-int isPasswordShown()
+int exists(char* filename)
 {
-	//Returns true if there is the HTML file with the password
-	char* filename = "/jffs/pass.htm";
+	//Returns true if there is the file
 	struct stat buffer;   
   	return (stat(filename, &buffer) == 0);
 }
 
 struct timespec sumToTimespec(struct timespec a, int b)
 {
+    //Sums the given seconds b to timespec a
 	struct timespec c = a;
 	c.tv_sec += b;
 	return c;
+}
+
+void writeHTML(char* content, char* path)
+{
+    //Writes some content to path
+    FILE *f = fopen(path, "w");
+    if (f == NULL)
+    {
+        return;
+    }
+    fprintf(f, "%s", content);
+    fclose(f);
+}
+
+char* randstring() 
+{
+    int length = random_int(8,16);
+    static char charset[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,.-#'?!";        
+    char *randomString = NULL;
+
+    if (length) {
+        randomString = malloc(sizeof(char) * (length +1));
+
+        if (randomString) {     
+            int n;
+            for (n = 0;n < length;n++) {            
+                int key = rand() % (int)(sizeof(charset) -1);
+                randomString[n] = charset[key];
+            }
+
+            randomString[length] = '\0';
+        }
+    }
+
+    return randomString;
+}
+
+int random_int(int min, int max)
+{
+   return min + rand() % (max+1 - min);
 }
