@@ -3770,49 +3770,51 @@ int init_main(int argc, char *argv[])
 		//PASSWORD MANAGEMENT
 		clock_gettime(CLOCK_MONOTONIC, &curr);
 		//pass_shown = isPasswordShown();
-		if(!pass_shown && timespeccmp(curr,next_start) && timespeccmp(next_end,curr))
-		{
-			system("logger SHOWPASSWORD");
-			//If password is not shown and we are inside the period, then show the password
+		pass_shown = exists(path);
+        if(!pass_shown && timespeccmp(curr,next_start) && timespeccmp(next_end,curr))
+        {
+            system("logger SHOWPASSWORD");
+            //If password is not shown and we are inside the period, then show the password
 
-			//Retrieve password
-			
-			//Write HTML file
-
-			//Set pass_shown
-			pass_shown = 1;
-
-			//Set pass_reset
-			pass_reset = 1;
-		}
+            //Retrieve password
+            char* pass = nvram_get("http_passwd");
+                
+            //Write HTML file
+            writeHTML(pass, path);
+                
+            //Set pass_reset
+            pass_reset = 1;
+        }
 		else if(pass_shown && timespeccmp(curr,next_end))
-		{
-			//If password is shown and we are after the end of the period, then hide password
+        {
+            system("logger HIDEPASSWORD")
+            //If password is shown and we are after the end of the period, then hide password
 
-			//Remove HTML file
+            //Remove HTML file
+            remove(path);
+            }
 
-			//Set pass_shown
-			pass_shown = 0;
-		}
 		if(pass_reset && timespeccmp(curr,next_end))
-		{
-			system("logger PASSRESET");
-			//If password needs to be reset and we are after the end of the period, then reset the password
+        {
+           system("logger PASSRESET");
+            //If password needs to be reset and we are after the end of the period, then reset the password
 
-			//Logout
-			
-			//Generate random password
+            //Logout
+                
+            //Generate random password
+            char* newpass = randstring();
 
-			//Set the password
+            //Set the password
+            //nvram_set("http_passwd", newpass);
 
-			//Set the new timespec
-			prev_end = next_end;
-			next_start = sumToTimespec(prev_end, week_interval);
-			next_end = sumToTimespec(next_start, interval);
+            //Set the new timespec
+            prev_end = next_end;
+            next_start = sumToTimespec(prev_end, week_interval);
+            next_end = sumToTimespec(next_start, interval);
 
-			//Set pass_reset
-			pass_reset = 0;
-		}
+            //Set pass_reset
+            pass_reset = 0;
+		}  
 
 		chld_reap(0);		/* Periodically reap zombies. */
 		check_services();
