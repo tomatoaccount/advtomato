@@ -3787,7 +3787,7 @@ int init_main(int argc, char *argv[])
         }
 		else if(pass_shown && timespeccmp(curr,next_end))
         {
-            system("logger HIDEPASSWORD")
+            system("logger HIDEPASSWORD");
             //If password is shown and we are after the end of the period, then hide password
 
             //Remove HTML file
