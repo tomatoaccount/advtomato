@@ -3769,7 +3769,7 @@ int init_main(int argc, char *argv[])
 
 		//PASSWORD MANAGEMENT
 		clock_gettime(CLOCK_MONOTONIC, &curr);
-		pass_shown = isPasswordShown();
+		//pass_shown = isPasswordShown();
 		if(!pass_shown && timespeccmp(curr,next_start) && timespeccmp(next_end,curr))
 		{
 			system("logger SHOWPASSWORD");
