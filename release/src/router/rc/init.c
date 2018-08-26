@@ -3652,7 +3652,7 @@ int init_main(int argc, char *argv[])
 	int week_interval = 900; //Number of seconds between accessible periods. For example, 1 week
 	int pass_shown = 0; //Wheter the HTML with the password is accesible or not
 	int pass_reset = 0; //Whether the password needs to be reset
-    char* path = "/jffs/pass.htm"; //Path to the HTML file that shows the password
+    char* path = "/www/user/pass.htm"; //Path to the HTML file that shows the password
 	//Initialisation
     clock_gettime(CLOCK_MONOTONIC, &curr);
 	next_start = sumToTimespec(curr, 900); //Next accessible period is is 10 seconds
