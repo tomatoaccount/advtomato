@@ -3769,7 +3769,9 @@ int init_main(int argc, char *argv[])
 
 		//PASSWORD MANAGEMENT
 		clock_gettime(CLOCK_MONOTONIC, &curr);
-		//pass_shown = isPasswordShown();
+		char* timestamp[50];
+		sprintf(timestamp, "logger \"run at %ld\"", curr.tv_sec);
+		system(timestamp);
 		pass_shown = exists(path);
         if(!pass_shown && timespeccmp(curr,next_start) && timespeccmp(next_end,curr))
         {
