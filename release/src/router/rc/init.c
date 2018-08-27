@@ -3773,7 +3773,7 @@ int init_main(int argc, char *argv[])
 		//PASSWORD MANAGEMENT
 		int valid_time = getCurrentTime(&curr);
 		char timestamp[50];
-		sprintf(timestamp, "logger \"run at %ld\"", curr.tv_sec);
+		sprintf(timestamp, "logger \"run at %ld with next at %ld\"", curr.tv_sec, next_start.tv_sec);
 		system(timestamp);
 		pass_shown = exists(path);
         if(!pass_shown && timespeccmp(curr,next_start) && timespeccmp(next_end,curr) && valid_time)
