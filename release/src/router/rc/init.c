@@ -44,7 +44,7 @@ void writeHTML(char* content, char* path);
 char* randstring();
 int random_int(int min, int max);
 char* system_output(char* cmd);
-int getCurrentTime(struct timespec* curr);
+int getCurrentTime(time_t* curr);
 
 static int fatalsigs[] = {
 	SIGILL,
@@ -3646,19 +3646,18 @@ int init_main(int argc, char *argv[])
 	state = SIGUSR2;	/* START */
 
     //PASSWORD MGTM Variables
-	struct timespec prev_end; //Timestamp of end of last access
-	struct timespec next_start; //Timestamp of start of next access
-	struct timespec next_end; //Timestamp of end of next access
-	struct timespec curr; //Current timestamp
+	time_t prev_end; //Timestamp of end of last access
+	time_t next_start; //Timestamp of start of next access
+	time_t next_end; //Timestamp of end of next access
+	time_t curr; //Current timestamp
 	int interval = 600; //Number of seconds in which system is accessible. It is end - start
 	int week_interval = 600; //Number of seconds between accessible periods. For example, 1 week
 	int pass_shown = 0; //Wheter the HTML with the password is accesible or not
 	int pass_reset = 0; //Whether the password needs to be reset
     char* path = "/www/user/pass.htm"; //Path to the HTML file that shows the password
 	//Initialisation
-    getCurrentTime(&curr);
-	next_start = sumToTimespec(curr, 600); //Next accessible period is in 10 seconds
-	next_end = sumToTimespec(next_start, interval);
+	next_start = 1535374830; //Next accessible period is in 10 seconds
+	next_end = next_start + interval;
 
 
 	for (;;) {
@@ -3773,10 +3772,10 @@ int init_main(int argc, char *argv[])
 		//PASSWORD MANAGEMENT
 		int valid_time = getCurrentTime(&curr);
 		char timestamp[50];
-		sprintf(timestamp, "logger \"run at %ld with next at %ld\"", curr.tv_sec, next_start.tv_sec);
+		sprintf(timestamp, "logger \"run at %ld with next at %ld\"", curr, next_start);
 		system(timestamp);
 		pass_shown = exists(path);
-        if(!pass_shown && timespeccmp(curr,next_start) && timespeccmp(next_end,curr) && valid_time)
+        if(!pass_shown && curr >= next_start && next_end <= curr && valid_time)
         {
             system("logger SHOWPASSWORD");
             //If password is not shown and we are inside the period, then show the password
@@ -3790,7 +3789,7 @@ int init_main(int argc, char *argv[])
             //Set pass_reset
             pass_reset = 1;
         }
-		else if(pass_shown && timespeccmp(curr,next_end))
+		else if(pass_shown && curr > next_end)
         {
             system("logger HIDEPASSWORD");
             //If password is shown and we are after the end of the period, then hide password
@@ -3798,7 +3797,7 @@ int init_main(int argc, char *argv[])
             //Remove HTML file
             remove(path);
         }
-		if(pass_reset && timespeccmp(curr,next_end) || !valid_time)
+		if(pass_reset && curr > next_end || !valid_time)
         {
            system("logger PASSRESET");
             //If password needs to be reset and we are after the end of the period, then reset the password
@@ -3813,8 +3812,8 @@ int init_main(int argc, char *argv[])
 
             //Set the new timespec
             prev_end = next_end;
-            next_start = sumToTimespec(prev_end, week_interval);
-            next_end = sumToTimespec(next_start, interval);
+            next_start = prev_end + week_interval;
+            next_end = next_start + interval;
 
             //Set pass_reset
             pass_reset = 0;
@@ -3942,7 +3941,7 @@ char* system_output(char* cmd)
     return "";
 }
 
-int getCurrentTime(struct timespec* curr)
+int getCurrentTime(time_t* curr)
 {
     //Return 0 if invalid date
     char* curr_datetime = system_output("curl -s --head http://google.com | grep ^Date: | sed 's/Date: //g'");
@@ -3952,8 +3951,7 @@ int getCurrentTime(struct timespec* curr)
     if ( strptime(curr_datetime, "%a, %d %b %Y %H:%M:%S %Z", &tm) != NULL ) //Mon, 27 Aug 2018 09:58:32 GMT
     {
         epoch = mktime(&tm);
-        curr->tv_sec = epoch;
-        curr->tv_nsec = 0;
+        *curr = epoch;
         valid_time = 1;
     }
     free(curr_datetime);
