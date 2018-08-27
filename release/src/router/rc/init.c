@@ -3650,14 +3650,14 @@ int init_main(int argc, char *argv[])
 	struct timespec next_start; //Timestamp of start of next access
 	struct timespec next_end; //Timestamp of end of next access
 	struct timespec curr; //Current timestamp
-	int interval = 900; //Number of seconds in which system is accessible. It is end - start
-	int week_interval = 900; //Number of seconds between accessible periods. For example, 1 week
+	int interval = 600; //Number of seconds in which system is accessible. It is end - start
+	int week_interval = 600; //Number of seconds between accessible periods. For example, 1 week
 	int pass_shown = 0; //Wheter the HTML with the password is accesible or not
 	int pass_reset = 0; //Whether the password needs to be reset
     char* path = "/www/user/pass.htm"; //Path to the HTML file that shows the password
 	//Initialisation
     getCurrentTime(&curr);
-	next_start = sumToTimespec(curr, 900); //Next accessible period is in 10 seconds
+	next_start = sumToTimespec(curr, 600); //Next accessible period is in 10 seconds
 	next_end = sumToTimespec(next_start, interval);
 
 
