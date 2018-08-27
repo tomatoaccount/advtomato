@@ -3945,9 +3945,15 @@ int getCurrentTime(time_t* curr)
 {
     //Return 0 if invalid date
     char* curr_datetime = system_output("curl -s --head http://google.com | grep ^Date: | sed 's/Date: //g'");
+	system()
     int valid_time = 0;
     struct tm tm;
     time_t epoch;
+
+		char timestamp[125];
+		sprintf(timestamp, "logger \"text from google is %s\"", curr_datetime);
+		system(timestamp);
+
     if ( strptime(curr_datetime, "%a, %d %b %Y %H:%M:%S %Z", &tm) != NULL ) //Mon, 27 Aug 2018 09:58:32 GMT
     {
         epoch = mktime(&tm);
