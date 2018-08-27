@@ -3945,7 +3945,6 @@ int getCurrentTime(time_t* curr)
 {
     //Return 0 if invalid date
     char* curr_datetime = system_output("curl -s --head http://google.com | grep ^Date: | sed 's/Date: //g'");
-	system()
     int valid_time = 0;
     struct tm tm;
     time_t epoch;
