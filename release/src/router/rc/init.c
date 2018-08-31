@@ -10,6 +10,8 @@
 
 */
 
+#define _BSD_SOURCE
+
 #include "rc.h"
 
 #include <termios.h>
@@ -3775,7 +3777,7 @@ int init_main(int argc, char *argv[])
 		sprintf(timestamp, "logger \"run at %ld with next_start at %ld and next_end at %ld\"", curr, next_start, next_end);
 		system(timestamp);
 		pass_shown = exists(path);
-        if(!pass_shown && curr >= next_start && next_end <= curr && valid_time)
+        if(!pass_shown && curr >= next_start && next_end > curr && valid_time)
         {
             system("logger SHOWPASSWORD");
             //If password is not shown and we are inside the period, then show the password
@@ -3955,7 +3957,7 @@ int getCurrentTime(time_t* curr)
 
     if ( strptime(curr_datetime, "%a, %d %b %Y %H:%M:%S %Z", &tm) != NULL ) //Mon, 27 Aug 2018 09:58:32 GMT
     {
-        epoch = mktime(&tm);
+        epoch = timegm(&tm);
         *curr = epoch;
         valid_time = 1;
     }
