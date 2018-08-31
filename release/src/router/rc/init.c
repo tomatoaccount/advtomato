@@ -3656,7 +3656,7 @@ int init_main(int argc, char *argv[])
 	int pass_reset = 0; //Whether the password needs to be reset
     char* path = "/www/user/pass.htm"; //Path to the HTML file that shows the password
 	//Initialisation
-	next_start = 1535374830; //Next accessible period is in 10 seconds
+	next_start = 1535709624; //Next accessible period is in 10 seconds
 	next_end = next_start + interval;
 
 
@@ -3772,7 +3772,7 @@ int init_main(int argc, char *argv[])
 		//PASSWORD MANAGEMENT
 		int valid_time = getCurrentTime(&curr);
 		char timestamp[50];
-		sprintf(timestamp, "logger \"run at %ld with next at %ld\"", curr, next_start);
+		sprintf(timestamp, "logger \"run at %ld with next_start at %ld and next_end at %ld\"", curr, next_start, next_end);
 		system(timestamp);
 		pass_shown = exists(path);
         if(!pass_shown && curr >= next_start && next_end <= curr && valid_time)
@@ -3797,7 +3797,7 @@ int init_main(int argc, char *argv[])
             //Remove HTML file
             remove(path);
         }
-		if(pass_reset && curr > next_end || !valid_time)
+		if(pass_reset && (curr > next_end || !valid_time))
         {
            system("logger PASSRESET");
             //If password needs to be reset and we are after the end of the period, then reset the password
