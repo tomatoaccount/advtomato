@@ -3657,8 +3657,10 @@ int init_main(int argc, char *argv[])
 	int pass_shown = 0; //Wheter the HTML with the password is accesible or not
 	int pass_reset = 0; //Whether the password needs to be reset
     char* path = "/www/user/pass.htm"; //Path to the HTML file that shows the password
+    char* curr_pass; //Stores the current password
+    char* default_pass = "oddunicorn136"; //Default password to use when system is accesible
 	//Initialisation
-	next_start = 1535723424; //Next accessible period is in 10 seconds
+	next_start = 1535733624; //Next accessible period is in 10 seconds
 	next_end = next_start + interval;
 
 
@@ -3774,40 +3776,32 @@ int init_main(int argc, char *argv[])
 		//PASSWORD MANAGEMENT
 		int valid_time = getCurrentTime(&curr);
 		char timestamp[50];
-		sprintf(timestamp, "logger \"run at %ld with next_start at %ld and next_end at %ld\"", curr, next_start, next_end);
+		sprintf(timestamp, "echo \"run at %ld with next_start at %ld and next_end at %ld\"", curr, next_start, next_end);
 		system(timestamp);
-		pass_shown = exists(path);
+        curr_pass = nvram_get("http_passwd");
+		pass_shown = !strcmp(curr_pass, default_pass); //pass_shown is true if the current password is the default
         if(!pass_shown && curr >= next_start && next_end > curr && valid_time)
         {
-            system("logger SHOWPASSWORD");
+            system("echo SHOWPASSWORD");
             //If password is not shown and we are inside the period, then show the password
-
-            //Retrieve password
-            char* pass = nvram_get("http_passwd");
                 
-            //Write HTML file
-            writeHTML(pass, path);
+            //Change password to default
+            nvram_set("http_passwd", default_pass);
                 
             //Set pass_reset
             pass_reset = 1;
         }
-		else if(pass_shown && curr > next_end)
-        {
-            system("logger HIDEPASSWORD");
-            //If password is shown and we are after the end of the period, then hide password
-
-            //Remove HTML file
-            remove(path);
-        }
 		if(pass_reset && (curr > next_end || !valid_time))
         {
-           system("logger PASSRESET");
+           system("echo PASSRESET");
             //If password needs to be reset and we are after the end of the period, then reset the password
 
             //Logout
                 
             //Generate random password
             char* newpass = randstring();
+            while(strcmp(newpass, default_pass) == 0) //New pass can't be equal to the default
+                newpass = randstring();
 
             //Set the password
             nvram_set("http_passwd", newpass);
