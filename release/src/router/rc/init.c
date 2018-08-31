@@ -3805,6 +3805,7 @@ int init_main(int argc, char *argv[])
 
             //Set the password
             nvram_set("http_passwd", newpass);
+			nvram_commit_x();
 
             //Set the new timespec
             prev_end = next_end;
