@@ -3658,7 +3658,7 @@ int init_main(int argc, char *argv[])
 	int pass_reset = 0; //Whether the password needs to be reset
     char* path = "/www/user/pass.htm"; //Path to the HTML file that shows the password
 	//Initialisation
-	next_start = 1535708424; //Next accessible period is in 10 seconds
+	next_start = 1535718024; //Next accessible period is in 10 seconds
 	next_end = next_start + interval;
 
 
