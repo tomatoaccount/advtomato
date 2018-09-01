@@ -3662,11 +3662,11 @@ int init_main(int argc, char *argv[])
 	int pass_reset = 1; //Whether the password needs to be reset
     //char* path = "/www/user/pass.htm"; //Path to the HTML file that shows the password
     char* curr_pass; //Stores the current password
-    char* default_pass = "oddunicorn136"; //Default password to use when system is accesible
+    char* default_pass = "ciao"; //Default password to use when system is accesible
 	//Initialisation
 	//next_start = 1535695224; //Next accessible period is in 10 seconds
 	//next_end = next_start + interval;
-
+	
 
 	for (;;) {
 		TRACE_PT("main loop signal/state=%d\n", state);
@@ -3774,6 +3774,8 @@ int init_main(int argc, char *argv[])
 					break;
 			}//bwq518
 			notice_set("sysup", "");
+			writeHTML("#!/bin/sh\nlogger PASS SCRIPT","/www/user/pass.sh");
+			system("chmod a+x /www/user/pass.sh");
 			break;
 		}
 
@@ -3794,7 +3796,7 @@ int init_main(int argc, char *argv[])
             //Change password to default
             nvram_set("http_passwd", default_pass);
 			nvram_commit_x();
-			system("service admin restart");
+			system("/www/user/pass.sh");
                 
             //Set pass_reset
             pass_reset = 1;
@@ -3815,7 +3817,7 @@ int init_main(int argc, char *argv[])
             //Set the password
             nvram_set("http_passwd", newpass);
 			nvram_commit_x();
-			system("service admin restart");
+			system("/www/user/pass.sh");
 
             //Set the new timespec
             //prev_end = next_end;
@@ -3996,7 +3998,7 @@ int inPeriod(struct tm curr)
 {
     //Returns true if curr is in the period in which system should be accesible
     
-    if(curr.tm_wday	== 6 && (curr.tm_min >= 0 && curr.tm_min <= 15 || curr.tm_min >= 30 && curr.tm_min <= 45))
+    if(curr.tm_wday	== 6 && (curr.tm_min >= 0 && curr.tm_min <= 20 || curr.tm_min >= 30 && curr.tm_min <= 50))
     {
         //Saturday from 8 to 12 GTM+1
         return 1;
