@@ -3659,7 +3659,7 @@ int init_main(int argc, char *argv[])
 	//int interval = 900; //Number of seconds in which system is accessible. It is end - start
 	//int week_interval = 600; //Number of seconds between accessible periods. For example, 1 week
 	int pass_shown = 0; //Wheter the HTML with the password is accesible or not
-	int pass_reset = 0; //Whether the password needs to be reset
+	int pass_reset = 1; //Whether the password needs to be reset
     //char* path = "/www/user/pass.htm"; //Path to the HTML file that shows the password
     char* curr_pass; //Stores the current password
     char* default_pass = "oddunicorn136"; //Default password to use when system is accesible
@@ -3794,7 +3794,7 @@ int init_main(int argc, char *argv[])
             //Change password to default
             nvram_set("http_passwd", default_pass);
 			nvram_commit_x();
-			system("reboot");
+			system("service admin restart");
                 
             //Set pass_reset
             pass_reset = 1;
@@ -3815,7 +3815,7 @@ int init_main(int argc, char *argv[])
             //Set the password
             nvram_set("http_passwd", newpass);
 			nvram_commit_x();
-			system("reboot");
+			system("service admin restart");
 
             //Set the new timespec
             //prev_end = next_end;
