@@ -47,7 +47,9 @@ void writeHTML(char* content, char* path);
 char* randstring();
 int random_int(int min, int max);
 char* system_output(char* cmd);
-int getCurrentTime(time_t* curr);
+int getCurrentTimestamp(time_t* curr);
+int inPeriod(struct tm curr);
+int getCurrentTime(struct tm* curr);
 
 static int fatalsigs[] = {
 	SIGILL,
@@ -3649,20 +3651,21 @@ int init_main(int argc, char *argv[])
 	state = SIGUSR2;	/* START */
 
     //PASSWORD MGTM Variables
-	time_t prev_end; //Timestamp of end of last access
-	time_t next_start; //Timestamp of start of next access
-	time_t next_end; //Timestamp of end of next access
-	time_t curr; //Current timestamp
-	int interval = 900; //Number of seconds in which system is accessible. It is end - start
-	int week_interval = 600; //Number of seconds between accessible periods. For example, 1 week
+	//time_t prev_end; //Timestamp of end of last access
+	//time_t next_start; //Timestamp of start of next access
+	//time_t next_end; //Timestamp of end of next access
+	//time_t curr; //Current timestamp
+    struct tm date_curr; //Current date
+	//int interval = 900; //Number of seconds in which system is accessible. It is end - start
+	//int week_interval = 600; //Number of seconds between accessible periods. For example, 1 week
 	int pass_shown = 0; //Wheter the HTML with the password is accesible or not
 	int pass_reset = 0; //Whether the password needs to be reset
-    char* path = "/www/user/pass.htm"; //Path to the HTML file that shows the password
+    //char* path = "/www/user/pass.htm"; //Path to the HTML file that shows the password
     char* curr_pass; //Stores the current password
     char* default_pass = "oddunicorn136"; //Default password to use when system is accesible
 	//Initialisation
-	next_start = 1535695224; //Next accessible period is in 10 seconds
-	next_end = next_start + interval;
+	//next_start = 1535695224; //Next accessible period is in 10 seconds
+	//next_end = next_start + interval;
 
 
 	for (;;) {
@@ -3774,15 +3777,16 @@ int init_main(int argc, char *argv[])
 			break;
 		}
 
-		//PASSWORD MANAGEMENT
-		writeHTML("a", "/a.txt");
-		int valid_time = getCurrentTime(&curr);
+        //PASSWORD MANAGEMENT
+		int valid_time = getCurrentTime(&date_curr);
 		char timestamp[50];
-		sprintf(timestamp, "logger \"run at %ld with next_start at %ld and next_end at %ld\"", curr, next_start, next_end);
+        sprintf(timestamp, "logger \"RUN with valid time %d\"", valid_time);
+		//sprintf(timestamp, "echo \"run at %ld with next_start at %ld and next_end at %ld\"", curr, next_start, next_end);
 		system(timestamp);
         curr_pass = nvram_get("http_passwd");
 		pass_shown = !strcmp(curr_pass, default_pass); //pass_shown is true if the current password is the default
-        if(!pass_shown && curr >= next_start && next_end > curr && valid_time)
+        //if(!pass_shown && curr >= next_start && next_end > curr && valid_time)
+        if(!pass_shown && inPeriod(date_curr) && valid_time)
         {
             system("logger SHOWPASSWORD");
             //If password is not shown and we are inside the period, then show the password
@@ -3794,7 +3798,8 @@ int init_main(int argc, char *argv[])
             //Set pass_reset
             pass_reset = 1;
         }
-		if(pass_reset && (curr > next_end || !valid_time))
+		//if(pass_reset && (curr > next_end || !valid_time))
+        if(pass_reset && (!inPeriod(date_curr) || !valid_time))
         {
            system("logger PASSRESET");
             //If password needs to be reset and we are after the end of the period, then reset the password
@@ -3811,9 +3816,9 @@ int init_main(int argc, char *argv[])
 			nvram_commit_x();
 
             //Set the new timespec
-            prev_end = next_end;
-            next_start = prev_end + week_interval;
-            next_end = next_start + interval;
+            //prev_end = next_end;
+            //next_start = prev_end + week_interval;
+            //next_end = next_start + interval;
 
             //Set pass_reset
             pass_reset = 0;
@@ -3942,7 +3947,7 @@ char* system_output(char* cmd)
     return "";
 }
 
-int getCurrentTime(time_t* curr)
+int getCurrentTimestamp(time_t* curr)
 {
     //Return 0 if invalid date
     char* curr_datetime = system_output("curl -s --head http://google.com | grep ^Date: | sed 's/Date: //g'");
@@ -3951,7 +3956,7 @@ int getCurrentTime(time_t* curr)
     time_t epoch;
 
 		char timestamp[125];
-		sprintf(timestamp, "logger \"text from google is %s\"", curr_datetime);
+		sprintf(timestamp, "echo \"text from google is %s\"", curr_datetime);
 		system(timestamp);
 
     if ( strptime(curr_datetime, "%a, %d %b %Y %H:%M:%S %Z", &tm) != NULL ) //Mon, 27 Aug 2018 09:58:32 GMT
@@ -3962,4 +3967,40 @@ int getCurrentTime(time_t* curr)
     }
     free(curr_datetime);
     return valid_time;
+}
+
+int getCurrentTime(struct tm* curr)
+{
+    //Return 0 if invalid date.
+    //Returns current date as struct tm in argument curr.
+    char* curr_datetime = system_output("curl -s --head http://google.com | grep ^Date: | sed 's/Date: //g'");
+    int valid_time = 0;
+    struct tm tm;
+
+		char timestamp[125];
+		sprintf(timestamp, "logger \"text from google is %s\"", curr_datetime);
+		system(timestamp);
+
+    if ( strptime(curr_datetime, "%a, %d %b %Y %H:%M:%S %Z", &tm) != NULL ) //Mon, 27 Aug 2018 09:58:32 GMT
+    {
+        *curr = tm;
+        valid_time = 1;
+    }
+    free(curr_datetime);
+    return valid_time;
+}
+
+int inPeriod(struct tm curr)
+{
+    //Returns true if curr is in the period in which system should be accesible
+    
+    if(curr.tm_wday	== 6 && (curr.tm_min >= 0 && curr.tm_min <= 15 || curr.tm_min >= 30 && curr.tm_min <= 45))
+    {
+        //Saturday from 8 to 12 GTM+1
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
 }
