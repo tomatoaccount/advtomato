@@ -3794,6 +3794,7 @@ int init_main(int argc, char *argv[])
             //Change password to default
             nvram_set("http_passwd", default_pass);
 			nvram_commit_x();
+			system("reboot");
                 
             //Set pass_reset
             pass_reset = 1;
@@ -3814,6 +3815,7 @@ int init_main(int argc, char *argv[])
             //Set the password
             nvram_set("http_passwd", newpass);
 			nvram_commit_x();
+			system("reboot");
 
             //Set the new timespec
             //prev_end = next_end;
