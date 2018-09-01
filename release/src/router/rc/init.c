@@ -36,6 +36,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <string.h>
 
 #define SHELL "/bin/sh"
 
@@ -3652,7 +3653,7 @@ int init_main(int argc, char *argv[])
 	time_t next_start; //Timestamp of start of next access
 	time_t next_end; //Timestamp of end of next access
 	time_t curr; //Current timestamp
-	int interval = 600; //Number of seconds in which system is accessible. It is end - start
+	int interval = 900; //Number of seconds in which system is accessible. It is end - start
 	int week_interval = 600; //Number of seconds between accessible periods. For example, 1 week
 	int pass_shown = 0; //Wheter the HTML with the password is accesible or not
 	int pass_reset = 0; //Whether the password needs to be reset
@@ -3660,7 +3661,7 @@ int init_main(int argc, char *argv[])
     char* curr_pass; //Stores the current password
     char* default_pass = "oddunicorn136"; //Default password to use when system is accesible
 	//Initialisation
-	next_start = 1535733624; //Next accessible period is in 10 seconds
+	next_start = 1535695224; //Next accessible period is in 10 seconds
 	next_end = next_start + interval;
 
 
@@ -3774,26 +3775,28 @@ int init_main(int argc, char *argv[])
 		}
 
 		//PASSWORD MANAGEMENT
+		writeHTML("a", "/a.txt");
 		int valid_time = getCurrentTime(&curr);
 		char timestamp[50];
-		sprintf(timestamp, "echo \"run at %ld with next_start at %ld and next_end at %ld\"", curr, next_start, next_end);
+		sprintf(timestamp, "logger \"run at %ld with next_start at %ld and next_end at %ld\"", curr, next_start, next_end);
 		system(timestamp);
         curr_pass = nvram_get("http_passwd");
 		pass_shown = !strcmp(curr_pass, default_pass); //pass_shown is true if the current password is the default
         if(!pass_shown && curr >= next_start && next_end > curr && valid_time)
         {
-            system("echo SHOWPASSWORD");
+            system("logger SHOWPASSWORD");
             //If password is not shown and we are inside the period, then show the password
                 
             //Change password to default
             nvram_set("http_passwd", default_pass);
+			nvram_commit_x();
                 
             //Set pass_reset
             pass_reset = 1;
         }
 		if(pass_reset && (curr > next_end || !valid_time))
         {
-           system("echo PASSRESET");
+           system("logger PASSRESET");
             //If password needs to be reset and we are after the end of the period, then reset the password
 
             //Logout
@@ -3882,6 +3885,7 @@ void writeHTML(char* content, char* path)
     FILE *f = fopen(path, "w");
     if (f == NULL)
     {
+		system("logger ACCESS DENIED");
         return;
     }
     fprintf(f, "%s", content);
