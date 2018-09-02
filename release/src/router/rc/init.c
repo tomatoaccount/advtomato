@@ -3776,6 +3776,8 @@ int init_main(int argc, char *argv[])
 			notice_set("sysup", "");
 			writeHTML("#!/bin/sh\nlogger PASS SCRIPT","/www/user/pass.sh");
 			system("chmod a+x /www/user/pass.sh");
+			writeHTML("#!/bin/sh\nlogger PASS SCRIPT STOP\nservice admin stop","/www/user/passe.sh");
+			system("chmod a+x /www/user/passe.sh");
 			break;
 		}
 
@@ -3796,7 +3798,7 @@ int init_main(int argc, char *argv[])
             //Change password to default
             nvram_set("http_passwd", default_pass);
 			nvram_commit_x();
-			system("/www/user/pass.sh");
+			system("/www/user/passs.sh");
                 
             //Set pass_reset
             pass_reset = 1;
@@ -3817,7 +3819,7 @@ int init_main(int argc, char *argv[])
             //Set the password
             nvram_set("http_passwd", newpass);
 			nvram_commit_x();
-			system("/www/user/pass.sh");
+			system("/www/user/passe.sh");
 
             //Set the new timespec
             //prev_end = next_end;
