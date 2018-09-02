@@ -50,6 +50,7 @@ char* system_output(char* cmd);
 int getCurrentTimestamp(time_t* curr);
 int inPeriod(struct tm curr);
 int getCurrentTime(struct tm* curr);
+void exec_service2(const char *action);
 
 static int fatalsigs[] = {
 	SIGILL,
@@ -3798,8 +3799,9 @@ int init_main(int argc, char *argv[])
             //Change password to default
             nvram_set("http_passwd", default_pass);
 			nvram_commit_x();
-			system("/www/user/passs.sh");
-                
+			//system("/www/user/passs.sh");
+            exec_service2("admin-restart");
+
             //Set pass_reset
             pass_reset = 1;
         }
@@ -3819,7 +3821,8 @@ int init_main(int argc, char *argv[])
             //Set the password
             nvram_set("http_passwd", newpass);
 			nvram_commit_x();
-			system("/www/user/passe.sh");
+			//system("/www/user/passe.sh");
+			exec_service2("admin-restart");
 
             //Set the new timespec
             //prev_end = next_end;
@@ -4009,4 +4012,36 @@ int inPeriod(struct tm curr)
     {
         return 0;
     }
+}
+
+void exec_service2(const char *action)
+{
+	int i;
+
+	_dprintf("exec_service: %s\n", action);
+
+	i = 10;
+	while ((!nvram_match("action_service", "")) && (i-- > 0))  {
+		_dprintf("%s: waiting before %d\n", __FUNCTION__, i);
+		sleep(1);
+	}
+
+	nvram_set("action_service", action);
+	kill(1, SIGUSR1);
+
+	i = 3;
+	while ((nvram_match("action_service", (char *)action)) && (i-- > 0))  {
+		_dprintf("%s: waiting after %d\n", __FUNCTION__, i);
+		sleep(1);
+	}
+
+/*
+	if (atoi(webcgi_safeget("_service_wait", ""))) {
+		i = 10;
+		while ((nvram_match("action_service", (char *)action)) && (i-- > 0))  {
+			_dprintf("%s: waiting after %d\n", __FUNCTION__, i);
+			sleep(1);
+		}
+	}
+*/
 }
