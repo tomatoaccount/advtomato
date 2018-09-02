@@ -4003,7 +4003,7 @@ int inPeriod(struct tm curr)
 {
     //Returns true if curr is in the period in which system should be accesible
     
-    if(curr.tm_wday	== 6 && (curr.tm_min >= 0 && curr.tm_min <= 20 || curr.tm_min >= 30 && curr.tm_min <= 50))
+    if((curr.tm_min >= 0 && curr.tm_min <= 20 || curr.tm_min >= 30 && curr.tm_min <= 50))
     {
         //Saturday from 8 to 12 GTM+1
         return 1;
