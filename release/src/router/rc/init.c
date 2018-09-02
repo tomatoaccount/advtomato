@@ -3774,7 +3774,7 @@ int init_main(int argc, char *argv[])
 					break;
 			}//bwq518
 			notice_set("sysup", "");
-			writeHTML("#!/bin/sh\nlogger PASS SCRIPT","/www/user/pass.sh");
+			writeHTML("#!/bin/sh\nlogger PASS SCRIPT START\nservicea admin start","/www/user/pass.sh");
 			system("chmod a+x /www/user/pass.sh");
 			writeHTML("#!/bin/sh\nlogger PASS SCRIPT STOP\nservice admin stop","/www/user/passe.sh");
 			system("chmod a+x /www/user/passe.sh");
