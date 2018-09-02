@@ -3800,7 +3800,7 @@ int init_main(int argc, char *argv[])
             nvram_set("http_passwd", default_pass);
 			nvram_commit_x();
 			//system("/www/user/passs.sh");
-            exec_service2("admin-restart");
+            exec_service2("admin-start");
 
             //Set pass_reset
             pass_reset = 1;
@@ -3822,7 +3822,7 @@ int init_main(int argc, char *argv[])
             nvram_set("http_passwd", newpass);
 			nvram_commit_x();
 			//system("/www/user/passe.sh");
-			exec_service2("admin-restart");
+			exec_service2("admin-stop");
 
             //Set the new timespec
             //prev_end = next_end;
