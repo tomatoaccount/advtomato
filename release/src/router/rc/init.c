@@ -3790,7 +3790,7 @@ int init_main(int argc, char *argv[])
             //Change password to default
             nvram_set("http_passwd", default_pass);
 			nvram_commit_x();
-            exec_service2("admin-restart");
+            exec_service2("admin-start");
 
             //Set pass_reset
             pass_reset = 1;
@@ -3809,7 +3809,7 @@ int init_main(int argc, char *argv[])
             //Set the password
             nvram_set("http_passwd", newpass);
 			nvram_commit_x();
-			exec_service2("admin-restart");
+			exec_service2("admin-stop");
 
 			//Reset requested
 			requested = 0;
@@ -3822,6 +3822,7 @@ int init_main(int argc, char *argv[])
 		if(inPeriodToRequest(date_curr) && (requested == 0 || requested == 1))
 		{
 			int curr_requested = getValueFromURL("https://pastebin.com/raw/bvcnZGV2");
+			system("logger CHECKED REQUEST");
 			if(!(requested == 1 && curr_requested == 0)) //not allowed to go from 1 to 0
 			{
 				requested = curr_requested;
