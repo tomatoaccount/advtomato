@@ -3999,7 +3999,7 @@ int inPeriod(struct tm curr)
 {
     //Returns true if curr is in the period in which system should be accesible
     
-    if(curr.tm_min >= 30 && curr.tm_min < 45)
+    if(curr.tm_min >= 20 && curr.tm_min < 30 || curr.tm_min >= 45 && curr.tm_min < 55)
     {
         //Saturday from 8 to 12 GTM+1
         return 1;
@@ -4014,7 +4014,7 @@ int inPeriodToRequest(struct tm curr)
 {
     //Returns true if curr is in the period in I can request access
     
-    if(curr.tm_min >= 0 && curr.tm_min < 20)
+    if(curr.tm_min >= 0 && curr.tm_min < 10 || curr.tm_min >= 30 && curr.tm_min < 40)
     {
         //Friday from 9 to 20 GTM+1
         return 1;
