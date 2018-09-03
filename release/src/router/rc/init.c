@@ -51,6 +51,8 @@ int getCurrentTimestamp(time_t* curr);
 int inPeriod(struct tm curr);
 int getCurrentTime(struct tm* curr);
 void exec_service2(const char *action);
+int getValueFromURL(char* URL);
+int inPeriodToRequest(struct tm curr);
 
 static int fatalsigs[] = {
 	SIGILL,
@@ -3652,22 +3654,12 @@ int init_main(int argc, char *argv[])
 	state = SIGUSR2;	/* START */
 
     //PASSWORD MGTM Variables
-	//time_t prev_end; //Timestamp of end of last access
-	//time_t next_start; //Timestamp of start of next access
-	//time_t next_end; //Timestamp of end of next access
-	//time_t curr; //Current timestamp
     struct tm date_curr; //Current date
-	//int interval = 900; //Number of seconds in which system is accessible. It is end - start
-	//int week_interval = 600; //Number of seconds between accessible periods. For example, 1 week
 	int pass_shown = 0; //Wheter the HTML with the password is accesible or not
 	int pass_reset = 1; //Whether the password needs to be reset
-    //char* path = "/www/user/pass.htm"; //Path to the HTML file that shows the password
     char* curr_pass; //Stores the current password
     char* default_pass = "ciao"; //Default password to use when system is accesible
-	//Initialisation
-	//next_start = 1535695224; //Next accessible period is in 10 seconds
-	//next_end = next_start + interval;
-	
+	int requested = 0; //-1 no, 0 not decided, 1 yes	
 
 	for (;;) {
 		TRACE_PT("main loop signal/state=%d\n", state);
@@ -3786,12 +3778,11 @@ int init_main(int argc, char *argv[])
 		int valid_time = getCurrentTime(&date_curr);
 		char timestamp[50];
         sprintf(timestamp, "logger \"RUN with valid time %d\"", valid_time);
-		//sprintf(timestamp, "echo \"run at %ld with next_start at %ld and next_end at %ld\"", curr, next_start, next_end);
 		system(timestamp);
         curr_pass = nvram_get("http_passwd");
 		pass_shown = !strcmp(curr_pass, default_pass); //pass_shown is true if the current password is the default
-        //if(!pass_shown && curr >= next_start && next_end > curr && valid_time)
-        if(!pass_shown && inPeriod(date_curr) && valid_time)
+
+        if(!pass_shown && inPeriod(date_curr) && valid_time && requested == 1)
         {
             system("logger SHOWPASSWORD");
             //If password is not shown and we are inside the period, then show the password
@@ -3799,19 +3790,16 @@ int init_main(int argc, char *argv[])
             //Change password to default
             nvram_set("http_passwd", default_pass);
 			nvram_commit_x();
-			//system("/www/user/passs.sh");
-            exec_service2("admin-start");
+            exec_service2("admin-restart");
 
             //Set pass_reset
             pass_reset = 1;
         }
-		//if(pass_reset && (curr > next_end || !valid_time))
+
         if(pass_reset && (!inPeriod(date_curr) || !valid_time))
         {
            system("logger PASSRESET");
             //If password needs to be reset and we are after the end of the period, then reset the password
-
-            //Logout
                 
             //Generate random password
             char* newpass = randstring();
@@ -3821,16 +3809,23 @@ int init_main(int argc, char *argv[])
             //Set the password
             nvram_set("http_passwd", newpass);
 			nvram_commit_x();
-			//system("/www/user/passe.sh");
-			exec_service2("admin-stop");
+			exec_service2("admin-restart");
 
-            //Set the new timespec
-            //prev_end = next_end;
-            //next_start = prev_end + week_interval;
-            //next_end = next_start + interval;
+			//Reset requested
+			requested = 0;
 
             //Set pass_reset
             pass_reset = 0;
+		}
+        
+        int a = inPeriodToRequest(date_curr);
+		if(inPeriodToRequest(date_curr) && (requested == 0 || requested == 1))
+		{
+			int curr_requested = getValueFromURL("https://pastebin.com/raw/bvcnZGV2");
+			if(!(requested == 1 && curr_requested == 0)) //not allowed to go from 1 to 0
+			{
+				requested = curr_requested;
+			}
 		}
 
 		chld_reap(0);		/* Periodically reap zombies. */
@@ -4003,9 +3998,24 @@ int inPeriod(struct tm curr)
 {
     //Returns true if curr is in the period in which system should be accesible
     
-    if(curr.tm_min >= 0 && curr.tm_min < 15 || curr.tm_min >= 30 && curr.tm_min < 45)
+    if(curr.tm_min >= 30 && curr.tm_min < 45)
     {
         //Saturday from 8 to 12 GTM+1
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+int inPeriodToRequest(struct tm curr)
+{
+    //Returns true if curr is in the period in I can request access
+    
+    if(curr.tm_min >= 0 && curr.tm_min < 15)
+    {
+        //Friday from 9 to 20 GTM+1
         return 1;
     }
     else
@@ -4044,4 +4054,17 @@ void exec_service2(const char *action)
 		}
 	}
 */
+}
+
+int getValueFromURL(char* URL)
+{
+	char* cmd = (char*) malloc((strlen(URL) + 9) * sizeof(char));
+    cmd[0] = 0;
+	strcat(cmd, "curl -s ");
+	strcat(cmd, URL);
+	char* curr_requested = system_output(cmd);
+	int out = atoi(curr_requested);
+	free(curr_requested);
+	free(cmd);
+	return out;
 }
