@@ -4013,7 +4013,7 @@ int inPeriodToRequest(struct tm curr)
 {
     //Returns true if curr is in the period in I can request access
     
-    if(curr.tm_min >= 0 && curr.tm_min < 15)
+    if(curr.tm_min >= 0 && curr.tm_min < 20)
     {
         //Friday from 9 to 20 GTM+1
         return 1;
