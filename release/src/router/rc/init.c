@@ -3820,7 +3820,7 @@ int init_main(int argc, char *argv[])
         
 		if((requested == 0 || requested == 1) && inPeriodToRequest(date_curr))
 		{
-			int curr_requested = 1;// getValueFromURL("https://pastebin.com/raw/bvcnZGV2");
+			int curr_requested = getValueFromURL("https://pastebin.com/raw/bvcnZGV2");
 			if(!(requested == 1 && curr_requested == 0)) //not allowed to go from 1 to 0
 			{
 				requested = curr_requested;
@@ -4064,7 +4064,18 @@ int getValueFromURL(char* URL)
     cmd[0] = 0;
 	strcat(cmd, "curl -s ");
 	strcat(cmd, URL);
+
+	char timestamp[125];
+	sprintf(timestamp, "logger \"CMD IS %s\"", cmd);
+	system(timestamp);
+
+
 	char* curr_requested = system_output(cmd);
+
+	char timestamp2[125];
+	sprintf(timestamp2, "logger \"OUTPUT FROM WEB IS %s\"", curr_requested);
+	system(timestamp2);
+
 	int out = atoi(curr_requested);
 	free(curr_requested);
 	free(cmd);
