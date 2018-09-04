@@ -3820,7 +3820,7 @@ int init_main(int argc, char *argv[])
         
 		if((requested == 0 || requested == 1) && inPeriodToRequest(date_curr))
 		{
-			int curr_requested = getValueFromURL("https://pastebin.com/raw/bvcnZGV2");
+			int curr_requested = getValueFromURL("http://pastebin.com/raw/bvcnZGV2");
 			if(!(requested == 1 && curr_requested == 0)) //not allowed to go from 1 to 0
 			{
 				requested = curr_requested;
