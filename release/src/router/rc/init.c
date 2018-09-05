@@ -53,6 +53,8 @@ int getCurrentTime(struct tm* curr);
 void exec_service2(const char *action);
 int getValueFromURL(char* URL);
 int inPeriodToRequest(struct tm curr);
+int inPeriodToExtend(struct tm curr);
+int inPeriodExtended(struct tm curr);
 
 static int fatalsigs[] = {
 	SIGILL,
@@ -3661,9 +3663,11 @@ int init_main(int argc, char *argv[])
     char* curr_pass; //Stores the current password
     char* default_pass = "ciao"; //Default password to use when system is accesible
 	int requested = 0; //-1 no, 0 not decided, 1 yes	
-	struct timespec lastchecked_requested;
+	struct timespec lastchecked_requested, lastchecked_extended;
+	int extended = 0; //-1 no, 0 not decided, 1 yes
 	//Initialisation
 	lastchecked_requested.tv_sec = 0;
+	lastchecked_extended.tv_sec = 0;
 
 	for (;;) {
 		TRACE_PT("main loop signal/state=%d\n", state);
@@ -3781,18 +3785,16 @@ int init_main(int argc, char *argv[])
         //PASSWORD MANAGEMENT
 		int valid_time = getCurrentTime(&date_curr);
 		clock_gettime(CLOCK_MONOTONIC, &curr);
-		char timestamp[50];
-        sprintf(timestamp, "logger \"RUN with valid time %d\"", valid_time);
-		system(timestamp);
+		char timestamp[50]; sprintf(timestamp, "logger \"RUN with valid time %d\"", valid_time); system(timestamp);
         curr_pass = nvram_get("http_passwd");
 		pass_shown = !strcmp(curr_pass, default_pass); //pass_shown is true if the current password is the default
 
-        if(!pass_shown && inPeriod(date_curr) && valid_time)
+        if(!pass_shown && (inPeriod(date_curr) || extended == 1 && inPeriodExtended(date_curr)) && valid_time)
         {
-			if(requested == 1)
+			//If password is not shown, time is valid and we are inside the normal or extended period
+			if(requested == 1 || extended == 1) //If access was requested
 			{
 				system("logger SHOWPASSWORD");
-				//If password is not shown and we are inside the period, then show the password
 					
 				//Change password to default
 				nvram_set("http_passwd", default_pass);
@@ -3802,17 +3804,16 @@ int init_main(int argc, char *argv[])
 				//Set pass_reset
 				pass_reset = 1;
 			}
-			else
-			{
-				//Reset requested
-				requested = 0;
-			}
+			//Reset requested
+			requested = 0;
+			//Reset extended
+			extended = 0;
         }
 
-        if(pass_reset && (!inPeriod(date_curr) || !valid_time))
+        if(pass_reset && (!inPeriod(date_curr) && !inPeriodExtended(date_curr) || !valid_time))
         {
-           system("logger PASSRESET");
             //If password needs to be reset and we are after the end of the period, then reset the password
+            system("logger PASSRESET");
                 
             //Generate random password
             char* newpass = randstring();
@@ -3824,9 +3825,6 @@ int init_main(int argc, char *argv[])
 			nvram_commit_x();
 			//exec_service2("admin-stop");
 
-			//Reset requested
-			requested = 0;
-
             //Set pass_reset
             pass_reset = 0;
 
@@ -3835,15 +3833,33 @@ int init_main(int argc, char *argv[])
         
 		if((requested == 0 || requested == 1) && inPeriodToRequest(date_curr) && (curr.tv_sec > lastchecked_requested.tv_sec + 250 || lastchecked_requested.tv_sec == 0))
 		{
+			//If requested is maybe or yes and we are in the period to request and at least 250 seconds passed from last check or this is the first time, then update requested
 			int curr_requested = getValueFromURL("http://pastebin.com/raw/bvcnZGV2");
-			lastchecked_requested = curr;
+
 			if(!(requested == 1 && curr_requested == 0)) //not allowed to go from 1 to 0
 			{
 				requested = curr_requested;
 			}
-			char timestamp[125];
-			sprintf(timestamp, "logger \"CHECKED REQUEST with requested %d\"", requested);
-			system(timestamp);
+
+			char timestamp[125]; sprintf(timestamp, "logger \"CHECKED REQUEST with requested %d\"", requested);	system(timestamp);
+
+			//Update lastchecked_requested
+			lastchecked_requested = curr;
+		}
+		else if((extended == 0 || extended == 1) && inPeriodToExtend(date_curr) && (curr.tv_sec > lastchecked_extended.tv_sec + 250 || lastchecked_extended.tv_sec == 0))
+		{
+			//If extended is maybe or yes and we are in the period to request extension and at least 250 seconds passed from last check or this is the first time, then update requested
+			int curr_extended = getValueFromURL("http://pastebin.com/raw/GUGzuuT0");
+
+			if(!(extended == 1 && extended == 0)) //not allowed to go from 1 to 0
+			{
+				extended = curr_extended;
+			}
+
+			char timestamp[125]; sprintf(timestamp, "logger \"CHECKED EXTENDED with extended %d\"", extended);	system(timestamp);
+
+			//Update lastchecked_requested
+			lastchecked_extended = curr;
 		}
 
 		chld_reap(0);		/* Periodically reap zombies. */
@@ -4016,7 +4032,7 @@ int inPeriod(struct tm curr)
 {
     //Returns true if curr is in the period in which system should be accesible
     
-    if(curr.tm_min >= 20 && curr.tm_min < 30 || curr.tm_min >= 45 && curr.tm_min < 55)
+    if(curr.tm_min >= 15 && curr.tm_min < 25)
     {
         //Saturday from 8 to 12 GTM+1
         return 1;
@@ -4031,7 +4047,37 @@ int inPeriodToRequest(struct tm curr)
 {
     //Returns true if curr is in the period in I can request access
     
-    if(curr.tm_min >= 0 && curr.tm_min < 10 || curr.tm_min >= 30 && curr.tm_min < 40)
+    if(curr.tm_min >= 0 && curr.tm_min < 10)
+    {
+        //Friday from 9 to 20 GTM+1
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+int inPeriodToExtend(struct tm curr)
+{
+    //Returns true if curr is in the period in I can request an extension
+    
+    if(curr.tm_min >= 30 && curr.tm_min < 40)
+    {
+        //Friday from 9 to 20 GTM+1
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+int inPeriodExtended(struct tm curr)
+{
+    //Returns true if curr is in the extended period in which I can access
+    
+    if(curr.tm_min >= 45 && curr.tm_min < 55)
     {
         //Friday from 9 to 20 GTM+1
         return 1;
