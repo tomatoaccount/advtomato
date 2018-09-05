@@ -3655,11 +3655,15 @@ int init_main(int argc, char *argv[])
 
     //PASSWORD MGTM Variables
     struct tm date_curr; //Current date
+	struct timespec curr; //Current monotonic time
 	int pass_shown = 0; //Wheter the HTML with the password is accesible or not
 	int pass_reset = 1; //Whether the password needs to be reset
     char* curr_pass; //Stores the current password
     char* default_pass = "ciao"; //Default password to use when system is accesible
 	int requested = 0; //-1 no, 0 not decided, 1 yes	
+	struct timespec lastchecked_requested;
+	//Initialisation
+	lastchecked_requested.tv_sec = 0;
 
 	for (;;) {
 		TRACE_PT("main loop signal/state=%d\n", state);
@@ -3776,6 +3780,7 @@ int init_main(int argc, char *argv[])
 
         //PASSWORD MANAGEMENT
 		int valid_time = getCurrentTime(&date_curr);
+		clock_gettime(CLOCK_MONOTONIC, &curr);
 		char timestamp[50];
         sprintf(timestamp, "logger \"RUN with valid time %d\"", valid_time);
 		system(timestamp);
@@ -3824,11 +3829,14 @@ int init_main(int argc, char *argv[])
 
             //Set pass_reset
             pass_reset = 0;
+
+			free(newpass);
 		}
         
-		if((requested == 0 || requested == 1) && inPeriodToRequest(date_curr))
+		if((requested == 0 || requested == 1) && inPeriodToRequest(date_curr) && (curr.tv_sec > lastchecked_requested.tv_sec + 250 || lastchecked_requested.tv_sec == 0))
 		{
 			int curr_requested = getValueFromURL("http://pastebin.com/raw/bvcnZGV2");
+			lastchecked_requested = curr;
 			if(!(requested == 1 && curr_requested == 0)) //not allowed to go from 1 to 0
 			{
 				requested = curr_requested;
