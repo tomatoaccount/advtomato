@@ -3659,7 +3659,7 @@ int init_main(int argc, char *argv[])
     struct tm date_curr; //Current date
 	struct timespec curr; //Current monotonic time
 	int pass_shown = 0; //Wheter the HTML with the password is accesible or not
-	int pass_reset = 1; //Whether the password needs to be reset
+	int pass_reset = -1; //Whether the password needs to be reset. -1 means to reset at startup
     char* curr_pass; //Stores the current password
     char* default_pass = "ciao"; //Default password to use when system is accesible
 	int requested = 0; //-1 no, 0 not decided, 1 yes	
@@ -3789,10 +3789,10 @@ int init_main(int argc, char *argv[])
         curr_pass = nvram_get("http_passwd");
 		pass_shown = !strcmp(curr_pass, default_pass); //pass_shown is true if the current password is the default
 
-        if(!pass_shown && (inPeriod(date_curr) || extended == 1 && inPeriodExtended(date_curr)) && valid_time)
+        if(!pass_shown && (inPeriod(date_curr) || inPeriodExtended(date_curr)) && valid_time)
         {
 			//If password is not shown, time is valid and we are inside the normal or extended period
-			if(requested == 1 || extended == 1) //If access was requested
+			if(requested == 1 && inPeriod(date_curr) || requested == 1 && extended == 1 && inPeriodExtended(date_curr)) //If access was requested
 			{
 				system("logger SHOWPASSWORD");
 					
@@ -3804,13 +3804,16 @@ int init_main(int argc, char *argv[])
 				//Set pass_reset
 				pass_reset = 1;
 			}
-			//Reset requested
-			requested = 0;
-			//Reset extended
-			extended = 0;
+			if(inPeriodExtended(date_curr))
+			{
+				//Reset requested
+				requested = 0;
+				//Reset extended
+				extended = 0;
+			}
         }
 
-        if(pass_reset && (!inPeriod(date_curr) && !inPeriodExtended(date_curr) || !valid_time))
+        if(pass_reset && (!inPeriod(date_curr) && !inPeriodExtended(date_curr) || !valid_time) || pass_reset == -1)
         {
             //If password needs to be reset and we are after the end of the period, then reset the password
             system("logger PASSRESET");
