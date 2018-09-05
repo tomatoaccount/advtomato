@@ -3782,18 +3782,26 @@ int init_main(int argc, char *argv[])
         curr_pass = nvram_get("http_passwd");
 		pass_shown = !strcmp(curr_pass, default_pass); //pass_shown is true if the current password is the default
 
-        if(!pass_shown && inPeriod(date_curr) && valid_time && requested == 1)
+        if(!pass_shown && inPeriod(date_curr) && valid_time)
         {
-            system("logger SHOWPASSWORD");
-            //If password is not shown and we are inside the period, then show the password
-                
-            //Change password to default
-            nvram_set("http_passwd", default_pass);
-			nvram_commit_x();
-            //exec_service2("admin-start");
+			if(requested == 1)
+			{
+				system("logger SHOWPASSWORD");
+				//If password is not shown and we are inside the period, then show the password
+					
+				//Change password to default
+				nvram_set("http_passwd", default_pass);
+				nvram_commit_x();
+				//exec_service2("admin-start");
 
-            //Set pass_reset
-            pass_reset = 1;
+				//Set pass_reset
+				pass_reset = 1;
+			}
+			else
+			{
+				//Reset requested
+				requested = 0;
+			}
         }
 
         if(pass_reset && (!inPeriod(date_curr) || !valid_time))
