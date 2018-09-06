@@ -55,6 +55,7 @@ int getValueFromURL(char* URL);
 int inPeriodToRequest(struct tm curr);
 int inPeriodToExtend(struct tm curr);
 int inPeriodExtended(struct tm curr);
+void nvram_safe_reset(char* name, char* value);
 
 static int fatalsigs[] = {
 	SIGILL,
@@ -3831,6 +3832,9 @@ int init_main(int argc, char *argv[])
             //Set pass_reset
             pass_reset = 0;
 
+			//Reset NVRAM key values
+			//nvram_safe_reset("name", "value");
+
 			free(newpass);
 		}
         
@@ -4145,4 +4149,12 @@ int getValueFromURL(char* URL)
 	free(curr_requested);
 	free(cmd);
 	return out;
+}
+
+void nvram_safe_reset(char* name, char* value)
+{
+	if(!nvram_match(name, value))
+	{
+		nvram_set(name, value);
+	}
 }
