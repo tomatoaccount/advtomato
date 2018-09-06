@@ -20,4 +20,3 @@ To build the router:
 
 This will create a parallel directory to src called image that contains the
 final image.
-
