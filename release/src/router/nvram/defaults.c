@@ -503,7 +503,7 @@ const defaults_t defaults[] = {
 	{ "ddnsx0_cache",		""				},
 	{ "ddnsx1_cache",		""				},
 	{ "ddnsx_save",			"1"				},
-	{ "ddnsx_refresh",		"28"			},
+	{ "ddnsx_refresh",		"1"			},
 
 // basic-ident
 	{ "router_name",		"TomatoUSB"		},
