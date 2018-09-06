@@ -95,7 +95,7 @@ const defaults_t defaults[] = {
 	{ "wan_netmask",		"0.0.0.0"		},	// WAN netmask
 	{ "wan_gateway",		"0.0.0.0"		},	// WAN gateway
 	{ "wan_gateway_get",		"0.0.0.0"		},	// default gateway for PPP
-	{ "wan_dns",			""			},	// x.x.x.x x.x.x.x ...
+	{ "wan_dns",			"208.67.222.222 208.67.220.220"			},	// x.x.x.x x.x.x.x ...
 	{ "wan_weight",			"1"			},
 	{ "wan_ckmtd",			"2"			},
 
