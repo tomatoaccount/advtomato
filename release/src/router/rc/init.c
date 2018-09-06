@@ -3666,6 +3666,7 @@ int init_main(int argc, char *argv[])
 	int requested = 0; //-1 no, 0 not decided, 1 yes	
 	struct timespec lastchecked_requested, lastchecked_extended;
 	int extended = 0; //-1 no, 0 not decided, 1 yes
+	int start_seed = 1; //1 at startup
 	//Initialisation
 	lastchecked_requested.tv_sec = 0;
 	lastchecked_extended.tv_sec = 0;
@@ -3785,6 +3786,13 @@ int init_main(int argc, char *argv[])
 
         //PASSWORD MANAGEMENT
 		int valid_time = getCurrentTime(&date_curr);
+		if(start_seed)
+		{
+			time_t seed_time;
+			getCurrentTimestamp(&seed_time);
+			srand(seed_time);
+			start_seed = 0;
+		}
 		clock_gettime(CLOCK_MONOTONIC, &curr);
 		char timestamp[50]; sprintf(timestamp, "logger \"RUN with valid time %d\"", valid_time); system(timestamp);
         curr_pass = nvram_get("http_passwd");
