@@ -3841,9 +3841,6 @@ int init_main(int argc, char *argv[])
             //Set pass_reset
             pass_reset = 0;
 
-			//Reset NVRAM key values
-			//nvram_safe_reset("name", "value");
-
 			free(newpass);
 		}
         
