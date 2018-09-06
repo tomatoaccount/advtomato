@@ -3786,6 +3786,7 @@ int init_main(int argc, char *argv[])
 		}
 
         //PASSWORD MANAGEMENT
+		/*
 		int valid_time = getCurrentTime(&date_curr);
 		if(start_seed)
 		{
@@ -3874,6 +3875,7 @@ int init_main(int argc, char *argv[])
 			//Update lastchecked_requested
 			lastchecked_extended = curr;
 		}
+		*/
 
 		chld_reap(0);		/* Periodically reap zombies. */
 		check_services();
