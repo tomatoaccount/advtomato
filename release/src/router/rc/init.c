@@ -56,6 +56,7 @@ int inPeriodToRequest(struct tm curr);
 int inPeriodToExtend(struct tm curr);
 int inPeriodExtended(struct tm curr);
 void nvram_safe_reset(char* name, char* value);
+void addDays(struct tm in, struct tm* out, int daysToAdd);
 
 static int fatalsigs[] = {
 	SIGILL,
@@ -4165,4 +4166,14 @@ void nvram_safe_reset(char* name, char* value)
 	{
 		nvram_set(name, value);
 	}
+}
+
+void addDays(struct tm in, struct tm* out, int daysToAdd)
+{
+    time_t oneDay = 24 * 60 * 60;
+
+     // Seconds since start of epoch --> 01/01/1970 at 00:00hrs
+    time_t date_seconds = timegm(&in) + (daysToAdd * oneDay);
+
+    *out = *localtime(&date_seconds);
 }
