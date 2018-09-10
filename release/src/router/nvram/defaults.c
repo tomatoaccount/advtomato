@@ -837,7 +837,7 @@ const defaults_t defaults[] = {
 	{ "cifs2",				""				},
 
 // admin-jffs2
-	{ "jffs2_on",			"0"				},
+	{ "jffs2_on",			"1"				},
 	{ "jffs2_exec",			""				},
 
 // admin-tomatoanon
