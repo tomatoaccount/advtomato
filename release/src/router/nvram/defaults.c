@@ -697,9 +697,10 @@ const defaults_t defaults[] = {
 	{ "ne_vgamma",			"2"				},	// "
 
 // access restrictions
-	{ "rruleN",				"1"				},
+	{ "rruleN",				"2"				},
 	{ "rrule0",				"0|1320|300|31|||word text\n^begins-with.domain.\n.ends-with.net$\n^www.exact-domain.net$|0|example" },
 	{ "rrule1",				"1|-1|-1|127||-1<d<1:19<0<<0<>-1<d<24:42<0<<0<>-1<d<44:52<0<<0<>-1<d<54:68<0<<0<>-1<d<70:79<0<<0<>-1<d<81:117<0<<0<>-1<d<119:122<0<<0<>-1<d<124:155<0<<0<>-1<d<157:442<0<<0<>-1<d<444:65535<0<<0<>17<d<443<0<<0<>-2<a<<0<ssdp<0<||0|BlockAllPortsExcept"		},
+	{ "rrule2",				"1|-1|-1|127||-2<a<<65535<<0<||0|P2P"				},
 //*	{ "rrule##",			""				},
 	{ "rrulewp",			"80,8080"		},
 
