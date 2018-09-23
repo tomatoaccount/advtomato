@@ -148,7 +148,7 @@ const defaults_t defaults[] = {
 	{ "dnscrypt_provider_key",	""			}, // Set manual provider key
 	{ "dnscrypt_resolver_address",	""			}, // Set manual resolver address
 #endif
-	{ "wan_wins",			"0.0.0.0"				},	// x.x.x.x x.x.x.x ...
+	{ "wan_wins",			""				},	// x.x.x.x x.x.x.x ...
 	{ "wan_lease",			"86400"			},	// WAN lease time in seconds
 	{ "wan_islan",			"0"				},
 	{ "wan_modem_ipaddr",		"0.0.0.0"			}, // modem IP address (i.e. PPPoE bridged modem)
@@ -378,13 +378,6 @@ const defaults_t defaults[] = {
 	{ "wl_crypto",			"aes"			},	// WPA data encryption
 	{ "wl_net_reauth",		"36000"			},	// Network Re-auth/PMK caching duration
 	{ "wl_akm",				""				},	// WPA akm list
-	
-	// Added WPA/WPA2 Personal
-	{ "wl0_security_mode",		"wpaX_personal"		},	// WPA mode (disabled|radius|wpa_personal|wpa_enterprise|wep|wpa2_personal|wpa2_enterprise) for WEB	// Add
-	{ "wl0_wpa_psk",		"carlitostevezllorente14"			},	// Network authentication mode (radius|none)
-	{ "wl0_lazywds",			"0"				},	// WPA pre-shared key
-	{ "wl0_akm",	"psk psk2"			},	// WPA GTK rekey interval	// Modify
-	
 
 	// WME parameters (cwmin cwmax aifsn txop_b txop_ag adm_control oldest_first)
 	// EDCA parameters for STA
