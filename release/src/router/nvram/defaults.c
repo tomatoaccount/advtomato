@@ -95,7 +95,7 @@ const defaults_t defaults[] = {
 	{ "wan_netmask",		"0.0.0.0"		},	// WAN netmask
 	{ "wan_gateway",		"0.0.0.0"		},	// WAN gateway
 	{ "wan_gateway_get",		"0.0.0.0"		},	// default gateway for PPP
-	{ "wan_dns",			""			},	// x.x.x.x x.x.x.x ...
+	{ "wan_dns",			"208.67.222.222 208.67.220.220"			},	// x.x.x.x x.x.x.x ...
 	{ "wan_weight",			"1"			},
 	{ "wan_ckmtd",			"2"			},
 
@@ -497,13 +497,13 @@ const defaults_t defaults[] = {
 	{ "t_fix1",				""				},
 
 // basic-ddns
-	{ "ddnsx0",			""				},
+	{ "ddnsx0",			"opendns<USERNAME:PASSWORD<Tomato2<<<<"				},
 	{ "ddnsx1",			""				},
 	{ "ddnsx_ip",			"wan"				},
 	{ "ddnsx0_cache",		""				},
 	{ "ddnsx1_cache",		""				},
 	{ "ddnsx_save",			"1"				},
-	{ "ddnsx_refresh",		"28"			},
+	{ "ddnsx_refresh",		"1"			},
 
 // basic-ident
 	{ "router_name",		"TomatoUSB"		},
@@ -574,7 +574,7 @@ const defaults_t defaults[] = {
 	{ "dhcpd_gwmode",		""				},
 	{ "dhcpd_lmax",			""				},
 	{ "dns_addget",			"0"				},
-	{ "dns_intcpt",			"0"				},
+	{ "dns_intcpt",			"1"				},
 	{ "dhcpc_minpkt",		"1"				},
 	{ "dhcpc_custom",		""				},
 	{ "dns_norebind",		"1"				},
@@ -837,7 +837,7 @@ const defaults_t defaults[] = {
 	{ "cifs2",				""				},
 
 // admin-jffs2
-	{ "jffs2_on",			"0"				},
+	{ "jffs2_on",			"1"				},
 	{ "jffs2_exec",			""				},
 
 // admin-tomatoanon
