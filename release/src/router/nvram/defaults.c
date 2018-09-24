@@ -95,7 +95,7 @@ const defaults_t defaults[] = {
 	{ "wan_netmask",		"0.0.0.0"		},	// WAN netmask
 	{ "wan_gateway",		"0.0.0.0"		},	// WAN gateway
 	{ "wan_gateway_get",		"0.0.0.0"		},	// default gateway for PPP
-	{ "wan_dns",			"208.67.222.222 208.67.220.220"			},	// x.x.x.x x.x.x.x ...
+	{ "wan_dns",			""			},	// x.x.x.x x.x.x.x ...
 	{ "wan_weight",			"1"			},
 	{ "wan_ckmtd",			"2"			},
 
@@ -497,13 +497,13 @@ const defaults_t defaults[] = {
 	{ "t_fix1",				""				},
 
 // basic-ddns
-	{ "ddnsx0",			"opendns<USERNAME:PASSWORD<Tomato2<<<<"				},
+	{ "ddnsx0",			""				},
 	{ "ddnsx1",			""				},
 	{ "ddnsx_ip",			"wan"				},
 	{ "ddnsx0_cache",		""				},
 	{ "ddnsx1_cache",		""				},
 	{ "ddnsx_save",			"1"				},
-	{ "ddnsx_refresh",		"1"			},
+	{ "ddnsx_refresh",		"28"			},
 
 // basic-ident
 	{ "router_name",		"TomatoUSB"		},
@@ -574,7 +574,7 @@ const defaults_t defaults[] = {
 	{ "dhcpd_gwmode",		""				},
 	{ "dhcpd_lmax",			""				},
 	{ "dns_addget",			"0"				},
-	{ "dns_intcpt",			"1"				},
+	{ "dns_intcpt",			"0"				},
 	{ "dhcpc_minpkt",		"1"				},
 	{ "dhcpc_custom",		""				},
 	{ "dns_norebind",		"1"				},
@@ -604,7 +604,7 @@ const defaults_t defaults[] = {
 	{ "DSCP_fix_enable",		"1"				},	// Comacst DSCP fix
 	{ "ne_snat",			"0"				},	// use SNAT instead of MASQUERADE
 	{ "dhcp_pass",			"1"				},	// allow DHCP responses
-	{ "ne_shlimit",			"0,3,60"			},	//shibby - enable limit connection attempts for sshd
+	{ "ne_shlimit",			"1,3,60"			},	//shibby - enable limit connection attempts for sshd
 
 // advanced-routing
 	{ "routes_static",		""				},
@@ -697,10 +697,8 @@ const defaults_t defaults[] = {
 	{ "ne_vgamma",			"2"				},	// "
 
 // access restrictions
-	{ "rruleN",				"2"				},
+	{ "rruleN",				"0"				},
 	{ "rrule0",				"0|1320|300|31|||word text\n^begins-with.domain.\n.ends-with.net$\n^www.exact-domain.net$|0|example" },
-	{ "rrule1",				"1|-1|-1|127||-1<d<1:19<0<<0<>-1<d<24:42<0<<0<>-1<d<44:52<0<<0<>-1<d<54:68<0<<0<>-1<d<70:79<0<<0<>-1<d<81:117<0<<0<>-1<d<119:122<0<<0<>-1<d<124:155<0<<0<>-1<d<157:442<0<<0<>-1<d<444:65535<0<<0<>17<d<443<0<<0<>-2<a<<0<ssdp<0<||0|BlockAllPortsExcept"		},
-	{ "rrule2",				"1|-1|-1|127||-2<a<<65535<<0<||0|P2P"				},
 //*	{ "rrule##",			""				},
 	{ "rrulewp",			"80,8080"		},
 
@@ -839,7 +837,7 @@ const defaults_t defaults[] = {
 	{ "cifs2",				""				},
 
 // admin-jffs2
-	{ "jffs2_on",			"1"				},
+	{ "jffs2_on",			"0"				},
 	{ "jffs2_exec",			""				},
 
 // admin-tomatoanon
