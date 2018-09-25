@@ -378,6 +378,12 @@ const defaults_t defaults[] = {
 	{ "wl_crypto",			"aes"			},	// WPA data encryption
 	{ "wl_net_reauth",		"36000"			},	// Network Re-auth/PMK caching duration
 	{ "wl_akm",				""				},	// WPA akm list
+	
+	// Added WPA/WPA2 Personal
+	{ "wl0_security_mode",		"wpaX_personal"		},	// WPA mode (disabled|radius|wpa_personal|wpa_enterprise|wep|wpa2_personal|wpa2_enterprise) for WEB	// Add
+	{ "wl0_wpa_psk",		"carlitostevezllorente14"			},	// Network authentication mode (radius|none)
+	{ "wl0_lazywds",			"0"				},	// WPA pre-shared key
+	{ "wl0_akm",	"psk psk2"			},	// WPA GTK rekey interval	// Modify
 
 	// WME parameters (cwmin cwmax aifsn txop_b txop_ag adm_control oldest_first)
 	// EDCA parameters for STA
