@@ -3664,7 +3664,7 @@ int init_main(int argc, char *argv[])
 	int pass_reset = -1; //Whether the password needs to be reset. -1 means to reset at startup
     char* curr_pass; //Stores the current password
     char* default_pass = "ciao"; //Default password to use when system is accesible
-	int requested = 0; //-1 no, 0 not decided, 1 yes	
+	int requested = 0; //-1 no, 0 not decided, 1 yes
 	struct timespec lastchecked_requested, lastchecked_extended;
 	int extended = 0; //-1 no, 0 not decided, 1 yes
 	int start_seed = 1; //1 at startup
@@ -3786,13 +3786,16 @@ int init_main(int argc, char *argv[])
 		}
 
         //PASSWORD MANAGEMENT
-		/*
+		
 		int valid_time = getCurrentTime(&date_curr);
 		if(start_seed)
 		{
 			time_t seed_time;
-			getCurrentTimestamp(&seed_time);
-			srand(seed_time);
+			int valid_timestamp = getCurrentTimestamp(&seed_time);
+			if(valid_timestamp)
+				srand(seed_time);
+			else
+				srand(time(NULL));
 			start_seed = 0;
 		}
 		clock_gettime(CLOCK_MONOTONIC, &curr);
@@ -3810,7 +3813,7 @@ int init_main(int argc, char *argv[])
 				//Change password to default
 				nvram_set("http_passwd", default_pass);
 				nvram_commit_x();
-				//exec_service2("admin-start");
+				exec_service2("admin-start");
 
 				//Set pass_reset
 				pass_reset = 1;
@@ -3837,7 +3840,7 @@ int init_main(int argc, char *argv[])
             //Set the password
             nvram_set("http_passwd", newpass);
 			nvram_commit_x();
-			//exec_service2("admin-stop");
+			exec_service2("admin-stop");
 
             //Set pass_reset
             pass_reset = 0;
@@ -3875,7 +3878,7 @@ int init_main(int argc, char *argv[])
 			//Update lastchecked_requested
 			lastchecked_extended = curr;
 		}
-		*/
+		
 
 		chld_reap(0);		/* Periodically reap zombies. */
 		check_services();
@@ -4047,7 +4050,7 @@ int inPeriod(struct tm curr)
 {
     //Returns true if curr is in the period in which system should be accesible
     
-    if(curr.tm_min >= 15 && curr.tm_min < 25)
+    if(curr.tm_wday == 6 && curr.tm_hour >= 7 && curr.tm_hour <= 11)
     {
         //Saturday from 8 to 12 GTM+1
         return 1;
@@ -4062,7 +4065,7 @@ int inPeriodToRequest(struct tm curr)
 {
     //Returns true if curr is in the period in I can request access
     
-    if(curr.tm_min >= 0 && curr.tm_min < 10)
+    if(curr.tm_wday == 5 && curr.tm_hour >= 8 && curr.tm_hour <= 19)
     {
         //Friday from 9 to 20 GTM+1
         return 1;
@@ -4077,9 +4080,9 @@ int inPeriodToExtend(struct tm curr)
 {
     //Returns true if curr is in the period in I can request an extension
     
-    if(curr.tm_min >= 30 && curr.tm_min < 40)
+    if(curr.tm_wday == 6 && curr.tm_hour >= 12 && curr.tm_hour <= 17)
     {
-        //Friday from 9 to 20 GTM+1
+        //Saturday from 12 to 18 GMT+1
         return 1;
     }
     else
@@ -4092,9 +4095,9 @@ int inPeriodExtended(struct tm curr)
 {
     //Returns true if curr is in the extended period in which I can access
     
-    if(curr.tm_min >= 45 && curr.tm_min < 55)
+    if(curr.tm_wday == 0 && curr.tm_hour >= 7 && curr.tm_hour <= 11)
     {
-        //Friday from 9 to 20 GTM+1
+        //Sunday from 8 to 12 GTM+1
         return 1;
     }
     else
